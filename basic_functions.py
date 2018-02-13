@@ -32,6 +32,9 @@ def _read_file_lines(path):
     with open(path, 'r', encoding='utf-8') as file:
         return file.read().split("\n")
 
+def _read_file(path):
+    with open(path, 'r', encoding='utf-8') as file:
+        return file.read()
 
 def _write_to_file(dirname, name, data):
     filename = os.path.join(dirname, name)

@@ -6,9 +6,16 @@ def _read_file_lines(path):
         return data
 
 def _split_lines(lines, separator=" "):
-    return dict([line.split(separator) for line in lines])
+    return dict([(line.split(separator)[1], line.split(separator)[0]) for line in columns])
 
-with open("exps/phoneticRules.txt", 'r', encoding='utf-8') as d:
-    columns = d.read().split("\n")
-    split = _split_lines(columns, "\t\t\t\t\t\t")
-print(split)
+def _get_rules():
+    with open("exps/phoneticRules.txt", 'r', encoding='utf-8') as d:
+        columns = d.read().split("\n")
+        split = _split_lines(columns, "\t\t\t\t\t\t")
+    return split
+
+def _get_slang():
+    with open("exps/slang.txt", 'r', encoding='utf-8') as d:
+        columns = d.read().split("\n")
+        slang = dict([line.split("      ") for line in columns])
+    return slang
