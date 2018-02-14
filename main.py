@@ -11,7 +11,6 @@ numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
 punctuation = (',', '.', '?', '!', ':', '-', '—', ";", '«', '»', "...", "(", ")", "``", "--")
 
 
-
 def _try_spaces(word, dictionary, flag=True):
     splits = [(word[:i], word[i:]) for i in range(1, len(word) + 1)]
     for split in splits:
@@ -25,7 +24,7 @@ def _try_spaces(word, dictionary, flag=True):
         for smsp0 in smaller_splits0:
             try:
                 a, b, c = dictionary[smsp0[0]], dictionary[smsp0[1]], dictionary[split[1]]
-                return " ".join(smsp0)+" "+split[1], dictionary[split[1]]
+                return " ".join(smsp0) + " " + split[1], dictionary[split[1]]
             except KeyError as e:
                 pass
     for split in splits:
@@ -33,7 +32,7 @@ def _try_spaces(word, dictionary, flag=True):
         for smsp1 in smaller_splits1:
             try:
                 a, b, c = dictionary[smsp1[0]], dictionary[smsp1[1]], dictionary[split[0]]
-                return split[0]+" "+" ".join(smsp1), dictionary[split[0]]
+                return split[0] + " " + " ".join(smsp1), dictionary[split[0]]
             except KeyError as e:
                 pass
     return word, 0
@@ -82,7 +81,6 @@ def main():
                 else:
                     print("**" * 3, words[i])
             outfile.write(corr_line)
-            exit(0)
 
 
 if __name__ == '__main__':

@@ -27,7 +27,7 @@ def _split_lines(lines, separator=" "):
 
 def _check(word):
     regex = re.compile(u"[А-я]+")
-    return word.isalpha() and regex.fullmatch(word) and word not in alp_list
+    return word.isalpha() and regex.fullmatch(word) or word in alp_list
 
 # --------------------------------------------------------------------
 # main
