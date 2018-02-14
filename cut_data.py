@@ -7,7 +7,7 @@ from basic_functions import _create_folder_if_absent
 from basic_functions import _get_data_from_cmd
 from basic_functions import _read_file_lines
 
-
+alp_list = ["А", "В", "И" "К", "О", "С", "У", "Э", "Я", "а", "в", "и" "к", "о", "с", "у", "э", "я"]
 # --------------------------------------------------------------------
 # DELETE TRASH AND WRITE
 # --------------------------------------------------------------------
@@ -27,7 +27,7 @@ def _split_lines(lines, separator=" "):
 
 def _check(word):
     regex = re.compile(u"[А-я]+")
-    return word.isalpha() and regex.fullmatch(word)
+    return word.isalpha() and regex.fullmatch(word) and word not in alp_list
 
 # --------------------------------------------------------------------
 # main

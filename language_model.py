@@ -22,24 +22,18 @@ def set_ngrams():
     new_tokens = []
     for token in tokens:
         if _check(token):
-            new_tokens.append(token)
+            new_tokens.append(token.lower())
     bigrams, trigrams, fourgrams, fivegrams = _all_ngrams_types(new_tokens)
     with open("ngrams/bigrams_f.pickle", "wb") as bigrams_f:
         pickle.dump(bigrams, bigrams_f)
-    #with open("ngrams/trigrams_f.pickle", "wb") as trigrams_f:
-    #    pickle.dump(trigrams, trigrams_f)
+    with open("ngrams/trigrams_f.pickle", "wb") as trigrams_f:
+        pickle.dump(trigrams, trigrams_f)
     #with open("ngrams/fourgrams_f.pickle", "wb") as fourgrams_f:
     #    pickle.dump(fourgrams, fourgrams_f)
     #with open("ngrams/fivegrams_f.pickle", "wb") as fivegrams_f:
     #    pickle.dump(fivegrams, fivegrams_f)
 
-def get_ngrams():
+def get_bigrams():
     with open("ngrams/bigrams_f.pickle", "rb") as bigrams_f:
         bigrams = pickle.load(bigrams_f)
-    with open("ngrams/trigrams_f.pickle", "rb") as trigrams_f:
-        trigrams  = pickle.load(trigrams_f)
-    with open("ngrams/fourgrams_f.pickle", "rb") as fourgrams_f:
-        fourgrams  = pickle.load(fourgrams_f)
-    with open("ngrams/fivegrams_f.pickle", "rb") as fivegrams_f:
-        fivegrams  = pickle.load(fivegrams_f)
-    return bigrams, trigrams, fourgrams, fivegrams
+    return bigrams
