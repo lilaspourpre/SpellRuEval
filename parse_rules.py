@@ -30,5 +30,5 @@ def _get_exps(directory):
 
 def _get_vocab(path):
     columns = _read_file_lines(path)
-    slang = dict([line.split(" ") for line in columns])
+    slang = dict([(line.split(" ")[0], int(line.split(" ")[1])) for line in columns])
     return slang

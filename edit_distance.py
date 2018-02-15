@@ -3,7 +3,7 @@
 
 
 import re
-alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЪЬЭЮЯфбвгдеёжзийклмнопрстуфхцчшщъыьэюя '
+alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЪЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя '
 
 
 def _read_file_lines(path):
@@ -46,7 +46,12 @@ def get_most_likely(word, d, ngrams, prev_word):
                 candidates.append(w)
         if not candidates:
             return word, 0
-        cand = _count_max_prob(candidates, d, ngrams, prev_word)
+        try:
+            cand = _count_max_prob(candidates, d, ngrams, prev_word)
+            if not cand:
+                cand = _count_max_prob(candidates, d, ngrams)
+        except KeyError:
+            cand = _count_max_prob(candidates, d, ngrams)
         if cand:
             return cand, d[cand]
         return word, 0
