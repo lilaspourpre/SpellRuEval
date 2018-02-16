@@ -3,7 +3,7 @@
 
 
 import re
-alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЪЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя '
+alphabet = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЫЪЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя- '
 
 
 def _read_file_lines(path):
@@ -38,7 +38,7 @@ def _count_max_prob(candidates, d, ngrams, prev_word=None):
     else:
         return max(candidates, key=d.get)
 
-def get_most_likely(word, d, ngrams, prev_word):
+def get_most_likely(word, d, ngrams, morpho_test, prev_word=None, next_word=None):
     candidates = []
     if word not in d:
         for w in get_edits1(word):
