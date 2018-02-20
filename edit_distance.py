@@ -53,17 +53,16 @@ def _check_in_morpho(word, edits, morpho):
             return res, 5
     return word, 0
 
-def get_most_likely(word, d, ngrams, morpho_test, prev_word=None, next_word=None):
+def get_most_likely(word, d, ngrams, prev_word=None, next_word=None):
     edits = get_edits1(word)
     candidates = _get_candidates_dict(d, edits)
-    if not candidates:
-        return _check_in_morpho(word, edits, morpho_test)
-    try:
-        cand = _count_max_prob(candidates, d, ngrams, prev_word)
-        if not cand:
+    if candidates != []:
+        try:
+            cand = _count_max_prob(candidates, d, ngrams, prev_word)
+            if not cand:
+                cand = _count_max_prob(candidates, d, ngrams)
+        except KeyError:
             cand = _count_max_prob(candidates, d, ngrams)
-    except KeyError:
-        cand = _count_max_prob(candidates, d, ngrams)
-    if cand:
-        return cand, d[cand]
+        if cand:
+            return cand, d[cand]
     return word, 0

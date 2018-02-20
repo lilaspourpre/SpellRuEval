@@ -149,7 +149,6 @@ def _check_word(word, dictionary, bigrams, rules, slang, prev_word=None, next_wo
 
     # check edit distance and bigrams
     most_likely_word, count = get_most_likely(word=word, d=dictionary, ngrams=bigrams,
-                                              morpho_test=_check_with_morphology,
                                               prev_word=prev_word, next_word=next_word)
     if int(count) > 0:
         return most_likely_word
