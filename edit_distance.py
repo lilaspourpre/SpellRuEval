@@ -30,7 +30,10 @@ def _count_max_prob(candidates, d, ngrams, prev_word=None):
         for candidate in candidates:
             bi_prob = int(ngrams[(prev_word,candidate)])/len(ngrams)
             full_prob = int(d[prev_word])/len(d)
-            con_prob = bi_prob/full_prob
+            if full_prob > 0:
+                con_prob = bi_prob/full_prob
+            else:
+                con_prob = 0
             if con_prob > max_prob:
                 max_prob = con_prob
                 max_cand = candidate
@@ -53,16 +56,19 @@ def _check_in_morpho(word, edits, morpho):
             return res, 5
     return word, 0
 
-def get_most_likely(word, d, ngrams, prev_word=None, next_word=None):
+def get_most_likely(word, d, ngrams, nltk_dict, prev_word=None, next_word=None):
     edits = get_edits1(word)
-    candidates = _get_candidates_dict(d, edits)
+    candidates = _get_candidates_dict(nltk_dict, edits)
     if candidates != []:
         try:
-            cand = _count_max_prob(candidates, d, ngrams, prev_word)
+            cand = _count_max_prob(candidates, nltk_dict, ngrams, prev_word)
             if not cand:
-                cand = _count_max_prob(candidates, d, ngrams)
+                cand = _count_max_prob(candidates, nltk_dict, ngrams)
         except KeyError:
             cand = _count_max_prob(candidates, d, ngrams)
         if cand:
-            return cand, d[cand]
+            try:
+                return cand, nltk_dict[cand]
+            except KeyError:
+                return cand, d[cand]
     return word, 0

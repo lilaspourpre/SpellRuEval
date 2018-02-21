@@ -29,6 +29,11 @@ def _get_slang(directory):
 def _get_exps(directory):
     return _get_rules(directory), _get_slang(directory)
 
-def _get_vocab(path):
+def get_vocab_nltk(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
+
+def get_vocab(path):
+    columns = _read_file_lines(path)
+    slang = dict([(line.split(" ")[0], int(line.split(" ")[1])) for line in columns])
+    return slang

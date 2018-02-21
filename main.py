@@ -7,7 +7,7 @@ from language_model import get_bigrams
 from basic_functions import _get_data_from_cmd
 from basic_functions import _read_file_lines
 from parse_rules import _get_exps
-from parse_rules import _get_vocab
+from parse_rules import *
 from pymorphy2 import MorphAnalyzer
 
 numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
@@ -120,7 +120,7 @@ def _check_letters(word, dictionary):
 # main function
 # --------------------------------------------------
 
-def _check_word(word, dictionary, bigrams, rules, slang, prev_word=None, next_word=None):
+def _check_word(word, dictionary, bigrams, rules, slang, nltk_dict, prev_word=None, next_word=None):
     # check in dict
     in_dict = _check_in_dictionary_all_variants(word, dictionary)
     if in_dict:
@@ -148,7 +148,7 @@ def _check_word(word, dictionary, bigrams, rules, slang, prev_word=None, next_wo
     # ------------------------------------
 
     # check edit distance and bigrams
-    most_likely_word, count = get_most_likely(word=word, d=dictionary, ngrams=bigrams,
+    most_likely_word, count = get_most_likely(word=word, d=dictionary, ngrams=bigrams, nltk_dict=nltk_dict,
                                               prev_word=prev_word, next_word=next_word)
     if int(count) > 0:
         return most_likely_word
@@ -171,6 +171,9 @@ def _check_word(word, dictionary, bigrams, rules, slang, prev_word=None, next_wo
     spacy_word, count = _try_spaces(word, dictionary)
     if int(count) > 0:
         return spacy_word
+
+
+
     return None
     #------------------------------------
 
@@ -179,40 +182,43 @@ def get_words(text):
     return re.findall('[А-я]+', text)
 
 
-def _correct_line(words, line, bigrams, vocab, rules, slang):
+def _correct_line(words, line, bigrams, vocab, rules, slang, nltk_dict):
     corr_line = line
     for i in range(len(words)):
         word = words[i]
         if i != 0:
-            s = _check_word(word, vocab, bigrams, rules, slang, prev_word=words[i - 1])
+            s = _check_word(word, vocab, bigrams, rules, slang, nltk_dict, prev_word=words[i - 1])
         else:
-            s = _check_word(word, vocab, bigrams, rules, slang, next_word=words[i + 1])
+            s = _check_word(word, vocab, bigrams, rules, slang, nltk_dict, next_word=words[i + 1])
         if s:
             corr_line = corr_line.replace(word, s)
     return corr_line
 
 
-def _start_testing(outpath, data, bigrams, vocab, rules, slang):
+def _start_testing(outpath, data, bigrams, vocab, rules, slang, nltk_dict=None):
     with open(outpath, "w", encoding="utf-8") as outfile:
         for line in data:
             words = get_words(line)
-            corrected_line = _correct_line(words, line, bigrams, vocab, rules, slang)
+            corrected_line = _correct_line(words, line, bigrams, vocab, rules, slang, nltk_dict)
             outfile.write(corrected_line + "\n")
 
 def main():
     usage = 'Usage: {} <input_file_dir> <outut_file_dir> <exps_dir> <vocab_path>'
     _, path, outpath, excps_dir, vocab_path = _get_data_from_cmd(5, usage)
 
-    data = _read_file_lines(path)
+    data = _read_file_lines("out/outfile_test77.txt")
     print("data loaded")
     bigrams = get_bigrams()
     print("bigrams loaded")
-    vocab = _get_vocab(vocab_path)
+    vocab = get_vocab(vocab_path)
     print("vocab loaded")
     rules, slang = _get_exps(excps_dir)
     print("exceptions loaded")
+    no_wiki_nltk_dict = get_vocab_nltk("spell/fact_ru_idiom_freq.pickle")
+    print("nltk_dict_loaded")
 
-    _start_testing(outpath, data, bigrams, vocab, rules, slang)
+    #_start_testing(outpath, data, bigrams, vocab, rules, slang)
+    _start_testing(outpath, data, bigrams, vocab, rules, slang, nltk_dict=no_wiki_nltk_dict)
 
 
 if __name__ == '__main__':
