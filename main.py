@@ -214,7 +214,7 @@ def main():
     print("vocab loaded")
     rules, slang = _get_exps(excps_dir)
     print("exceptions loaded")
-    no_wiki_nltk_dict = get_vocab_nltk("spell/fact_ru_idiom_freq.pickle")
+    no_wiki_nltk_dict = get_vocab_nltk("spell/fact_ru_idiom_freq_2.pickle")
     print("nltk_dict_loaded")
 
     #_start_testing(outpath, data, bigrams, vocab, rules, slang)
