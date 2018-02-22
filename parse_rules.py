@@ -10,7 +10,7 @@ def _read_file_lines(path):
 
 
 def _split_lines(lines, separator=" "):
-    return dict([(line.split(separator)[1], line.split(separator)[0]) for line in lines])
+    return [line.split() for line in lines]
 
 
 def _get_rules(directory):
@@ -26,12 +26,15 @@ def _get_slang(directory):
         slang = dict([line.split("      ") for line in columns])
     return slang
 
+
 def _get_exps(directory):
     return _get_rules(directory), _get_slang(directory)
+
 
 def get_vocab_nltk(path):
     with open(path, 'rb') as f:
         return pickle.load(f)
+
 
 def get_vocab(path):
     columns = _read_file_lines(path)

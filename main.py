@@ -2,7 +2,7 @@
 import re
 from collections import Counter
 
-from edit_distance import get_most_likely
+from my_edit_distance import get_most_likely, count_max_prob
 from language_model import get_bigrams
 from basic_functions import _get_data_from_cmd
 from basic_functions import _read_file_lines
@@ -14,7 +14,7 @@ numbers = ("1", "2", "3", "4", "5", "6", "7", "8", "9", "0")
 punctuation = (',', '.', '?', '!', ':', '-', '—', ";", '«', '»', "...", "(", ")", "``", "--")
 
 
-def _try_spaces(word, dictionary, flag=True):
+def _try_spaces(word, dictionary, nltk_dict, flag=True):
     splits = [(word[:i], word[i:]) for i in range(1, len(word) + 1)]
     for split in splits:
         try:
@@ -48,23 +48,28 @@ def _try_spaces(word, dictionary, flag=True):
     return word, 0
 
 
-def _find_ruled_word(word, dictionary, rules):
+def _find_ruled_word(word, dictionary, rules, ngrams, prev_word):
+    candidates = []
     for rule in rules:
-        if rule in word:
-            result, count = _check_in_dictionary(word.replace(rule, rules[rule]), dictionary)
+        wrong = rule[1]
+        right = rule[0]
+        if wrong in word:
+            result, count = _check_in_dictionary(word.replace(wrong, right), dictionary)
             if count > 0:
-                return result
-            else:
-                pass
-    return False
+                candidates.append(result)
+    if candidates:
+        return count_max_prob(candidates=candidates, d=dictionary, ngrams=ngrams)
+    return word
 
 
-def _check_in_rules(word, dictionary, rules):
+def _check_in_rules(word, dictionary, rules, ngrams, prev_word):
     try:
-        ruled_word = _find_ruled_word(word, dictionary, rules)
-        return ruled_word
+        ruled_word = _find_ruled_word(word, dictionary, rules, ngrams, prev_word)
+        if ruled_word != word:
+            return ruled_word
     except KeyError:
         return False
+    return False
 
 
 def _check_in_slang(word, slang):
@@ -142,7 +147,7 @@ def _check_word(word, dictionary, bigrams, rules, slang, nltk_dict, prev_word=No
     # ------------------------------------
 
     # check in rules
-    in_rules = _check_in_rules(word, dictionary, rules)
+    in_rules = _check_in_rules(word, nltk_dict, rules, bigrams, prev_word)
     if in_rules:
         return in_rules
     # ------------------------------------
@@ -168,12 +173,12 @@ def _check_word(word, dictionary, bigrams, rules, slang, nltk_dict, prev_word=No
     # ------------------------------------
 
     # check with spaces
-    spacy_word, count = _try_spaces(word, dictionary)
+    spacy_word, count = _try_spaces(word, dictionary, nltk_dict)
     if int(count) > 0:
         return spacy_word
 
 
-
+    print(word)
     return None
     #------------------------------------
 
@@ -206,7 +211,7 @@ def main():
     usage = 'Usage: {} <input_file_dir> <outut_file_dir> <exps_dir> <vocab_path>'
     _, path, outpath, excps_dir, vocab_path = _get_data_from_cmd(5, usage)
 
-    data = _read_file_lines("out/outfile_test77.txt")
+    data = _read_file_lines(path)
     print("data loaded")
     bigrams = get_bigrams()
     print("bigrams loaded")
@@ -214,10 +219,10 @@ def main():
     print("vocab loaded")
     rules, slang = _get_exps(excps_dir)
     print("exceptions loaded")
+    print(rules)
     no_wiki_nltk_dict = get_vocab_nltk("spell/fact_ru_idiom_freq_2.pickle")
     print("nltk_dict_loaded")
 
-    #_start_testing(outpath, data, bigrams, vocab, rules, slang)
     _start_testing(outpath, data, bigrams, vocab, rules, slang, nltk_dict=no_wiki_nltk_dict)
 
 
