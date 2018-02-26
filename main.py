@@ -125,7 +125,7 @@ def _check_letters(word, dictionary):
 # main function
 # --------------------------------------------------
 
-def _check_word(word, dictionary, bigrams, rules, slang, nltk_dict, prev_word=None, next_word=None):
+def _check_word(word, dictionary, bigrams, rules, slang, prob_char2, prob_char3, nltk_dict, prev_word, next_word):
     # check in dict
     in_dict = _check_in_dictionary_all_variants(word, dictionary)
     if in_dict:
@@ -152,60 +152,58 @@ def _check_word(word, dictionary, bigrams, rules, slang, nltk_dict, prev_word=No
         return in_rules
     # ------------------------------------
 
-    # check edit distance and bigrams
-    most_likely_word, count = get_most_likely(word=word, d=dictionary, ngrams=bigrams, nltk_dict=nltk_dict,
-                                              prev_word=prev_word, next_word=next_word)
-    if int(count) > 0:
-        return most_likely_word
-    # ------------------------------------
-
-    # # check character edit distance and bigrams
-    # most_likely_with_chars, char_count = get_most_likely_char(word=word, d=dictionary, ngrams=bigrams,
-    #                                                           morpho_test=_check_with_morphology)
-    # if char_count > 0:
-    #     return most_likely_with_chars
-    # #------------------------------------
-
     # check with morphology
     morpho_word = _check_with_morphology(word)
     if morpho_word:
         return morpho_word
     # ------------------------------------
 
+
+    # check edit distance and bigrams
+    most_likely_word, count = get_most_likely(word=word, d=dictionary, ngrams=bigrams, nltk_dict=nltk_dict,
+                                              p2=prob_char2, p3=prob_char3,
+                                              prev_word=prev_word, next_word=next_word)
+    if int(count) > 0:
+        print(word, most_likely_word)
+        return most_likely_word
+    # ------------------------------------
+
+
     # check with spaces
     spacy_word, count = _try_spaces(word, dictionary, nltk_dict)
     if int(count) > 0:
         return spacy_word
 
-
-    print(word)
     return None
-    #------------------------------------
+    # ------------------------------------
 
 
 def get_words(text):
     return re.findall('[А-я]+', text)
 
 
-def _correct_line(words, line, bigrams, vocab, rules, slang, nltk_dict):
+def _correct_line(words, line, bigrams, vocab, rules, slang, prob_char2, prob_char3, nltk_dict):
     corr_line = line
     for i in range(len(words)):
         word = words[i]
         if i != 0:
-            s = _check_word(word, vocab, bigrams, rules, slang, nltk_dict, prev_word=words[i - 1])
+            s = _check_word(word, vocab, bigrams, rules, slang, prob_char2, prob_char3, nltk_dict,
+                            prev_word=words[i - 1], next_word=None)
         else:
-            s = _check_word(word, vocab, bigrams, rules, slang, nltk_dict, next_word=words[i + 1])
+            s = _check_word(word, vocab, bigrams, rules, slang, prob_char2, prob_char3, nltk_dict, prev_word=None,
+                            next_word=words[i + 1])
         if s:
             corr_line = corr_line.replace(word, s)
     return corr_line
 
 
-def _start_testing(outpath, data, bigrams, vocab, rules, slang, nltk_dict=None):
+def _start_testing(outpath, data, bigrams, vocab, rules, slang, prob_char2, prob_char3, nltk_dict=None):
     with open(outpath, "w", encoding="utf-8") as outfile:
         for line in data:
             words = get_words(line)
-            corrected_line = _correct_line(words, line, bigrams, vocab, rules, slang, nltk_dict)
+            corrected_line = _correct_line(words, line, bigrams, vocab, rules, slang, prob_char2, prob_char3, nltk_dict)
             outfile.write(corrected_line + "\n")
+
 
 def main():
     usage = 'Usage: {} <input_file_dir> <outut_file_dir> <exps_dir> <vocab_path>'
@@ -219,11 +217,14 @@ def main():
     print("vocab loaded")
     rules, slang = _get_exps(excps_dir)
     print("exceptions loaded")
-    print(rules)
     no_wiki_nltk_dict = get_vocab_nltk("spell/fact_ru_idiom_freq_2.pickle")
     print("nltk_dict_loaded")
+    prob_char2 = get_vocab_nltk("ngrams/char_cprob.pickle")
+    print("char_cprob_loaded")
+    prob_char3 = get_vocab_nltk("ngrams/char_cprob3.pickle")
+    print("char_cprob3_loaded")
 
-    _start_testing(outpath, data, bigrams, vocab, rules, slang, nltk_dict=no_wiki_nltk_dict)
+    _start_testing(outpath, data, bigrams, vocab, rules, slang, prob_char2, prob_char3, nltk_dict=no_wiki_nltk_dict)
 
 
 if __name__ == '__main__':

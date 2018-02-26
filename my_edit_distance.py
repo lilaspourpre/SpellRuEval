@@ -21,8 +21,25 @@ def get_edits1(word):
     inserts    = [a + c + b     for a, b in splits for c in alphabet]
     return set(deletes + transposes + replaces + inserts)
 
-def count_max_prob(candidates, d, ngrams, prev_word=None, next_word=None):
+
+def _get_max_word(candidates, p2, p3, prev_word, next_word, ngrams):
+    print(p2)
+    for candidate in candidates:
+        if prev_word:
+            a = int(ngrams[(prev_word, candidate)])
+            if a > 0:
+                print(prev_word, candidate, a)
+        if next_word:
+            b = int(ngrams[(candidate, next_word)])
+            if b > 0:
+                print(candidate, next_word, b)
+
+    print(candidates, prev_word, next_word)
+
+
+def count_max_prob(candidates, d, ngrams, p2=None, p3=None, prev_word=None, next_word=None, candidates2=None):
     if prev_word:
+        #print(_get_max_word(candidates, p2, p3, prev_word, next_word, ngrams))
         max_prob = 0
         max_cand = None
         for candidate in candidates:
@@ -37,6 +54,7 @@ def count_max_prob(candidates, d, ngrams, prev_word=None, next_word=None):
                 max_cand = candidate
         return max_cand
     else:
+        #print(_get_max_word(candidates, p2, p3, prev_word, next_word, ngrams))
         return max(candidates, key=d.get)
 
 
@@ -57,26 +75,23 @@ def _check_in_morpho(word, edits, morpho):
 def _sort_by_count(cands):
     return cands[1]
 
-def get_most_likely(word, d, ngrams, nltk_dict, prev_word=None, next_word=None, flag=True):
+def get_most_likely(word, d, ngrams, nltk_dict, p2, p3, prev_word, next_word):
     edits = get_edits1(word)
     candidates = _get_candidates_dict(nltk_dict, edits)
-    if candidates != []:
+    candidates2 = []
+    for candidate in edits:
+        c_edits = get_edits1(candidate)
+        candidates2.extend(_get_candidates_dict(nltk_dict, c_edits))
+    if candidates:
         try:
-            cand = count_max_prob(candidates, nltk_dict, ngrams, prev_word, next_word)
+            cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3, prev_word, next_word, candidates2)
             if not cand:
-                cand = count_max_prob(candidates, nltk_dict, ngrams)
+                cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3, candidates2)
         except KeyError:
-            cand = count_max_prob(candidates, d, ngrams)
+            cand = count_max_prob(candidates, d, ngrams, p2, p3, candidates2)
         if cand:
             try:
                 return cand, nltk_dict[cand]
             except KeyError:
                 return cand, d[cand]
-    if flag:
-        new_cands = []
-        for candidate in edits:
-            new_cands.append(get_most_likely(candidate, d, ngrams, nltk_dict, prev_word, next_word, flag=False))
-        if new_cands != []:
-            result = sorted(new_cands, key=_sort_by_count, reverse=True)[0]
-            return result[0], result[1]
     return word, 0
