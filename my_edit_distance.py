@@ -36,8 +36,7 @@ def _get_max_word(candidates, p2, p3, prev_word, next_word, ngrams):
 
     print(candidates, prev_word, next_word)
 
-
-def count_max_prob(candidates, d, ngrams, p2=None, p3=None, prev_word=None, next_word=None, candidates2=None):
+def count_max_prob(candidates, d, ngrams, p2=None, p3=None, prev_word=None, next_word=None):
     if prev_word:
         #print(_get_max_word(candidates, p2, p3, prev_word, next_word, ngrams))
         max_prob = 0
@@ -78,17 +77,13 @@ def _sort_by_count(cands):
 def get_most_likely(word, d, ngrams, nltk_dict, p2, p3, prev_word, next_word):
     edits = get_edits1(word)
     candidates = _get_candidates_dict(nltk_dict, edits)
-    candidates2 = []
-    for candidate in edits:
-        c_edits = get_edits1(candidate)
-        candidates2.extend(_get_candidates_dict(nltk_dict, c_edits))
     if candidates:
         try:
-            cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3, prev_word, next_word, candidates2)
+            cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3, prev_word, next_word)
             if not cand:
-                cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3, candidates2)
+                cand = count_max_prob(candidates, nltk_dict, ngrams, p2, p3)
         except KeyError:
-            cand = count_max_prob(candidates, d, ngrams, p2, p3, candidates2)
+            cand = count_max_prob(candidates, d, ngrams, p2, p3)
         if cand:
             try:
                 return cand, nltk_dict[cand]
